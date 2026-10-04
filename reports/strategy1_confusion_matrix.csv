@@ -1,0 +1,3 @@
+,pred_not_flagged(LOW/ALLOW),pred_flagged(MEDIUM+HIGH)
+actual_legit(0),111428,2616
+actual_fraud(1),3542,522

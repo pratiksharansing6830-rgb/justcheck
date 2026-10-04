@@ -1,0 +1,177 @@
+{
+  "columns": {
+    "P_emaildomain": {
+      "domain_stats": {
+        "anonymous.com": {
+          "fraud_rate": 0.023263575982110075,
+          "frauds": 697,
+          "high_risk": false,
+          "lift": 0.6621156532550291,
+          "n": 29961
+        },
+        "aol.com": {
+          "fraud_rate": 0.021885224157750464,
+          "frauds": 495,
+          "high_risk": false,
+          "lift": 0.6228857292182883,
+          "n": 22618
+        },
+        "att.net": {
+          "fraud_rate": 0.0063836578359399935,
+          "frauds": 20,
+          "high_risk": false,
+          "lift": 0.1816883088588953,
+          "n": 3133
+        },
+        "bellsouth.net": {
+          "fraud_rate": 0.028481012658227847,
+          "frauds": 45,
+          "high_risk": false,
+          "lift": 0.810611589382005,
+          "n": 1580
+        },
+        "charter.net": {
+          "fraud_rate": 0.023255813953488372,
+          "frauds": 16,
+          "high_risk": false,
+          "lift": 0.6618947344824639,
+          "n": 688
+        },
+        "comcast.net": {
+          "fraud_rate": 0.030018472906403942,
+          "frauds": 195,
+          "high_risk": false,
+          "lift": 0.8543699736199909,
+          "n": 6496
+        },
+        "cox.net": {
+          "fraud_rate": 0.021409455842997322,
+          "frauds": 24,
+          "high_risk": false,
+          "lift": 0.6093446618964342,
+          "n": 1121
+        },
+        "gmail.com": {
+          "fraud_rate": 0.04400302147877302,
+          "frauds": 8039,
+          "high_risk": false,
+          "lift": 1.252390833379101,
+          "n": 182692
+        },
+        "hotmail.com": {
+          "fraud_rate": 0.05202109909037085,
+          "frauds": 1933,
+          "high_risk": false,
+          "lift": 1.4805971375059994,
+          "n": 37158
+        },
+        "icloud.com": {
+          "fraud_rate": 0.031802822500496916,
+          "frauds": 160,
+          "high_risk": false,
+          "lift": 0.9051551924546515,
+          "n": 5031
+        },
+        "live.com": {
+          "fraud_rate": 0.03191919191919192,
+          "frauds": 79,
+          "high_risk": false,
+          "lift": 0.9084672375906788,
+          "n": 2475
+        },
+        "live.com.mx": {
+          "fraud_rate": 0.028846153846153848,
+          "frauds": 18,
+          "high_risk": false,
+          "lift": 0.8210040456561333,
+          "n": 624
+        },
+        "me.com": {
+          "fraud_rate": 0.013396375098502758,
+          "frauds": 17,
+          "high_risk": false,
+          "lift": 0.38128057597059195,
+          "n": 1269
+        },
+        "msn.com": {
+          "fraud_rate": 0.017664670658682633,
+          "frauds": 59,
+          "high_risk": false,
+          "lift": 0.5027625573000033,
+          "n": 3340
+        },
+        "optonline.net": {
+          "fraud_rate": 0.009580838323353293,
+          "frauds": 8,
+          "high_risk": false,
+          "lift": 0.27268477684067977,
+          "n": 835
+        },
+        "outlook.com": {
+          "fraud_rate": 0.09166666666666666,
+          "frauds": 374,
+          "high_risk": true,
+          "lift": 2.6089684117517122,
+          "n": 4080
+        },
+        "rocketmail.com": {
+          "fraud_rate": 0.0038461538461538464,
+          "frauds": 2,
+          "high_risk": false,
+          "lift": 0.10946720608748443,
+          "n": 520
+        },
+        "sbcglobal.net": {
+          "fraud_rate": 0.004592901878914405,
+          "frauds": 11,
+          "high_risk": false,
+          "lift": 0.1307207554948666,
+          "n": 2395
+        },
+        "verizon.net": {
+          "fraud_rate": 0.0066607460035523975,
+          "frauds": 15,
+          "high_risk": false,
+          "lift": 0.18957464642148722,
+          "n": 2252
+        },
+        "yahoo.com": {
+          "fraud_rate": 0.02293021990254038,
+          "frauds": 1854,
+          "high_risk": false,
+          "lift": 0.6526278480027085,
+          "n": 80854
+        },
+        "yahoo.com.mx": {
+          "fraud_rate": 0.011673151750972763,
+          "frauds": 15,
+          "high_risk": false,
+          "lift": 0.3322351001876959,
+          "n": 1285
+        },
+        "ymail.com": {
+          "fraud_rate": 0.0219435736677116,
+          "frauds": 42,
+          "high_risk": false,
+          "lift": 0.6245464422546133,
+          "n": 1914
+        }
+      },
+      "high_risk_domains": [
+        "outlook.com"
+      ],
+      "n_distinct_domains": 59,
+      "n_domains_ignored_low_support": 37,
+      "n_domains_meeting_support": 22
+    }
+  },
+  "fit_rows": 472432,
+  "high_risk_rule": "support >= min_support AND fraud_rate >= lift_threshold * overall_fraud_rate",
+  "lift_threshold": 1.5,
+  "min_support": 500,
+  "overall_fraud_rate": 0.03513521522674162,
+  "points": {
+    "P_emaildomain": 20
+  },
+  "risk_fraud_rate_cutoff": 0.052702822840112434
+}
