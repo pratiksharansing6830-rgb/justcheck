@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: adaptive-fraud-strategy-validation
+Version: 0.1.0
+Summary: Dataset-agnostic foundations for fraud strategy validation
+Requires-Python: >=3.10
+Requires-Dist: pandas>=2.0
+Provides-Extra: test
+Requires-Dist: pytest>=8.0; extra == "test"
