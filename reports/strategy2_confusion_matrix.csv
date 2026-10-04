@@ -1,0 +1,3 @@
+,pred_not_fraud,pred_fraud
+actual_legit(0),113671,373
+actual_fraud(1),2587,1477

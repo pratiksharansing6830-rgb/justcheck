@@ -1,0 +1,160 @@
+{
+  "strategy": "Strategy 2: XGBoost classifier (not claimed to be optimal)",
+  "split": {
+    "method": "chronological by TransactionDT (stable sort), first 80% train / last 20% evaluation; no random split; identical to Strategy 1",
+    "training_rows": 472432,
+    "training_TransactionDT_range": [
+      86400,
+      12192842
+    ],
+    "training_fraud_rate": 0.03513521522674162,
+    "evaluation_rows": 118108,
+    "evaluation_TransactionDT_range": [
+      12192900,
+      15811131
+    ],
+    "evaluation_fraud_rate": 0.034409184813899145,
+    "boundary_TransactionDT_tie": false
+  },
+  "leakage_controls": [
+    "isFraud, TransactionID and raw TransactionDT are not features",
+    "category encodings learned from the training portion only; unseen -> NaN",
+    "early stopping uses the chronologically latest slice of the TRAINING portion only",
+    "final model refit on full training portion; evaluation labels used only for metrics"
+  ],
+  "model": {
+    "config": {
+      "n_estimators": 500,
+      "learning_rate": 0.1,
+      "max_depth": 6,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 1,
+      "early_stopping_rounds": 30,
+      "early_stopping_fraction": 0.1,
+      "threshold": 0.5,
+      "random_state": 42,
+      "n_jobs": 1
+    },
+    "fit_info": {
+      "early_stopping_fit_rows": 425188,
+      "early_stopping_val_rows": 47244,
+      "best_iteration": 417,
+      "final_fit_rows": 472432,
+      "n_trees": 418
+    },
+    "numeric_features": [
+      "TransactionAmt",
+      "card1",
+      "card2",
+      "card3",
+      "card5",
+      "addr1",
+      "addr2",
+      "dist1",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D10",
+      "D15"
+    ],
+    "categorical_features": [
+      "ProductCD",
+      "card4",
+      "card6",
+      "P_emaildomain",
+      "R_emaildomain",
+      "M1",
+      "M2",
+      "M3",
+      "M4",
+      "M5",
+      "M6",
+      "M7",
+      "M8",
+      "M9"
+    ],
+    "categorical_cardinality_learned_from_training": {
+      "ProductCD": 5,
+      "card4": 4,
+      "card6": 4,
+      "P_emaildomain": 59,
+      "R_emaildomain": 60,
+      "M1": 2,
+      "M2": 2,
+      "M3": 2,
+      "M4": 3,
+      "M5": 2,
+      "M6": 2,
+      "M7": 2,
+      "M8": 2,
+      "M9": 2
+    }
+  },
+  "fit_seconds": 82.0,
+  "threshold": 0.5,
+  "evaluation": {
+    "n_transactions": 118108,
+    "predicted_fraud_flagged": 1850,
+    "predicted_not_fraud": 116258,
+    "metrics": {
+      "TP": 1477,
+      "TN": 113671,
+      "FP": 373,
+      "FN": 2587,
+      "precision": 0.7983783783783783,
+      "recall": 0.36343503937007876,
+      "f1": 0.4994927291173487,
+      "false_positive_rate": 0.003270667461681456,
+      "false_negative_rate": 0.6365649606299213,
+      "fraud_detection_rate": 0.36343503937007876
+    },
+    "supplementary_threshold_independent": {
+      "roc_auc": 0.9180023170881415,
+      "pr_auc_average_precision": 0.5590054468046485
+    },
+    "confusion_matrix": {
+      "rows": [
+        "actual_legit(0)",
+        "actual_fraud(1)"
+      ],
+      "cols": [
+        "pred_not_fraud",
+        "pred_fraud"
+      ],
+      "values": [
+        [
+          113671,
+          373
+        ],
+        [
+          2587,
+          1477
+        ]
+      ]
+    },
+    "note": "Accuracy intentionally not reported as a headline metric (3.5% fraud base rate)."
+  },
+  "files": [
+    "strategy2_xgboost_metrics.json",
+    "strategy2_confusion_matrix.csv",
+    "strategy2_validation_predictions.csv",
+    "strategy2_feature_importance.csv"
+  ]
+}
