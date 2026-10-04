@@ -129,7 +129,7 @@ def test_metrics():
 
 def test_r_emaildomain_not_used_and_max_score_80():
     from fraud_validation.strategies import rule_based as rb
-    assert rb.EMAIL_COLUMNS == ("P_emaildomain",) and rb.MAX_SCORE == 80
+    assert rb.EMAIL_COLUMNS == ("P_emaildomain",) and rb.MAX_SCORE == 135
     df = _email_frame().iloc[:800]
     s = RuleBasedFraudStrategy(min_support=50).fit(df)
     assert list(s.email_config["columns"]) == ["P_emaildomain"]
@@ -138,3 +138,113 @@ def test_r_emaildomain_not_used_and_max_score_80():
     assert r["risk_score"] == 80 and r["risk_level"] == "HIGH" and r["decision"] == "BLOCK"
     assert not any("R_emaildomain" in x for x in r["reasons"])
     assert s.score({"R_emaildomain": "risky.com"})["risk_score"] == 0
+
+
+def test_behavioral_velocity_rules_add_configured_points_and_reasons():
+    row_1h = {
+        "TransactionAmt": 100,
+        "prior_transaction_count": 3,
+        "prior_transaction_count_1h": 3,
+    }
+    row_24h = {
+        "TransactionAmt": 100,
+        "prior_transaction_count": 10,
+        "prior_transaction_count_24h": 10,
+    }
+
+    score_1h = S.score(row_1h)
+    score_24h = S.score(row_24h)
+
+    assert score_1h["risk_score"] == 15
+    assert score_1h["reasons"] == [
+        "high transaction velocity in the previous hour"
+    ]
+    assert score_24h["risk_score"] == 15
+    assert score_24h["reasons"] == [
+        "high transaction velocity in the previous 24 hours"
+    ]
+
+
+def test_behavioral_deviation_and_new_profile_rules():
+    deviation = S.score(
+        {
+            "TransactionAmt": 100,
+            "prior_transaction_count": 2,
+            "amount_vs_prior_mean": 3,
+        }
+    )
+    new_profile = S.score(
+        {"TransactionAmt": 100, "prior_transaction_count": 0}
+    )
+
+    assert deviation["risk_score"] == 20
+    assert deviation["reasons"] == [
+        "transaction amount is significantly above the card's prior average"
+    ]
+    assert new_profile["risk_score"] == 5
+    assert new_profile["risk_level"] == "LOW"
+    assert new_profile["decision"] == "ALLOW"
+    assert new_profile["reasons"] == [
+        "no previous transaction history available for this card"
+    ]
+
+
+def test_multiple_behavioral_and_transaction_rules_combine():
+    result = S.score(
+        {
+            "TransactionAmt": 200,
+            "ProductCD": "C",
+            "prior_transaction_count": 10,
+            "prior_transaction_count_1h": 3,
+            "prior_transaction_count_24h": 10,
+            "amount_vs_prior_mean": 3,
+        }
+    )
+
+    assert result["risk_score"] == 25 + 15 + 15 + 20 + 15
+    assert result["risk_level"] == "HIGH"
+    assert result["decision"] == "BLOCK"
+    assert result["reasons"] == [
+        "ProductCD=C (+25)",
+        "High transaction amount (+15)",
+        "high transaction velocity in the previous hour",
+        "high transaction velocity in the previous 24 hours",
+        "transaction amount is significantly above the card's prior average",
+    ]
+
+
+def test_missing_behavioral_columns_preserve_transaction_rules():
+    transaction = {
+        "TransactionAmt": 200,
+        "ProductCD": "C",
+        "card4": "discover",
+        "card6": "credit",
+    }
+
+    result = S.score(transaction)
+
+    assert result["risk_score"] == 60
+    assert result["risk_level"] == "MEDIUM"
+    assert result["decision"] == "VERIFY"
+    assert all("velocity" not in reason for reason in result["reasons"])
+
+
+def test_strategy_score_ignores_is_fraud_and_is_deterministic():
+    frame = pd.DataFrame(
+        {
+            "TransactionAmt": [100, 200],
+            "prior_transaction_count": [1, 0],
+            "prior_transaction_count_1h": [3, 0],
+            "amount_vs_prior_mean": [3, 0],
+            "isFraud": [0, 1],
+        }
+    )
+    flipped = frame.assign(isFraud=1 - frame["isFraud"])
+
+    scores = S.score_dataframe(frame, include_reasons=True)
+    repeated = S.score_dataframe(frame, include_reasons=True)
+    flipped_scores = S.score_dataframe(flipped, include_reasons=True)
+
+    pd.testing.assert_frame_equal(scores, repeated)
+    pd.testing.assert_frame_equal(scores, flipped_scores)
+    assert scores["risk_score"].tolist() == [35, 20]

@@ -1,0 +1,39 @@
+{
+  "strategy": "Strategy 1: explainable rule-based scoring",
+  "split_method": "chronological by TransactionDT; earliest 70% train and latest 30% validation, keeping equal timestamps together; no random split",
+  "train_rows": 413378,
+  "validation_rows": 177162,
+  "train_time_start": 86400,
+  "train_time_end": 10437996,
+  "validation_time_start": 10438003,
+  "validation_time_end": 15811131,
+  "true_positives": 368,
+  "true_negatives": 167575,
+  "false_positives": 3462,
+  "false_negatives": 5757,
+  "precision": 0.09608355091383812,
+  "recall": 0.060081632653061226,
+  "f1": 0.07393269713711703,
+  "false_positive_rate": 0.020241234352800855,
+  "false_negative_rate": 0.9399183673469388,
+  "fraud_detection_rate": 0.060081632653061226,
+  "legitimate_transactions_blocked_rate": 0.020241234352800855,
+  "confusion_matrix": {
+    "labels": [
+      0,
+      1
+    ],
+    "matrix": [
+      [
+        167575,
+        3462
+      ],
+      [
+        5757,
+        368
+      ]
+    ]
+  },
+  "score_count": 177162,
+  "mean_score": 20.33830618304151
+}

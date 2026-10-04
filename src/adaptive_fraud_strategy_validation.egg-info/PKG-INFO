@@ -3,6 +3,9 @@ Name: adaptive-fraud-strategy-validation
 Version: 0.1.0
 Summary: Dataset-agnostic foundations for fraud strategy validation
 Requires-Python: >=3.10
+Requires-Dist: fastapi>=0.110
 Requires-Dist: pandas>=2.0
+Requires-Dist: pydantic>=2.0
+Requires-Dist: uvicorn>=0.27
 Provides-Extra: test
 Requires-Dist: pytest>=8.0; extra == "test"

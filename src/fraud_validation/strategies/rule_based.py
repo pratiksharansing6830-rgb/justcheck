@@ -5,7 +5,7 @@ rule is a fixed, hand-specified threshold. Learned parameters are stored in a
 JSON-serialisable config so decisions are reproducible.
 
 Email rule: P_emaildomain high-risk -> +20 (R_emaildomain is NOT used).
-Max score = 25 + 15 + 20 + 10 + 10 = 80.
+Behavioral rules use precomputed, leakage-safe history features when present.
 """
 from __future__ import annotations
 
@@ -26,10 +26,17 @@ CARD4_POINTS = {"discover": 10}
 CARD6_POINTS = {"credit": 10}
 EMAIL_POINTS = {"P_emaildomain": 20}
 EMAIL_COLUMNS = tuple(EMAIL_POINTS)
+VELOCITY_1H_THRESHOLD = 3
+VELOCITY_24H_THRESHOLD = 10
+AMOUNT_DEVIATION_THRESHOLD = 3
+VELOCITY_1H_POINTS = 15
+VELOCITY_24H_POINTS = 15
+AMOUNT_DEVIATION_POINTS = 20
+NEW_PROFILE_POINTS = 5
 
 LOW_MAX = 39
 MEDIUM_MAX = 69
-MAX_SCORE = 80
+MAX_SCORE = 135
 DECISIONS = {"LOW": "ALLOW", "MEDIUM": "VERIFY", "HIGH": "BLOCK"}
 
 assert (
@@ -38,6 +45,10 @@ assert (
     + sum(EMAIL_POINTS.values())
     + max(CARD4_POINTS.values())
     + max(CARD6_POINTS.values())
+    + VELOCITY_1H_POINTS
+    + VELOCITY_24H_POINTS
+    + AMOUNT_DEVIATION_POINTS
+    + NEW_PROFILE_POINTS
     == MAX_SCORE
 )
 
@@ -167,7 +178,40 @@ class RuleBasedFraudStrategy:
             hr = list(self.high_risk_domains[col])
             mask = _norm(df, col).isin(hr).to_numpy(dtype=bool) if hr else np.zeros(len(df), dtype=bool)
             comps[col] = np.where(mask, EMAIL_POINTS[col], 0).astype(np.int64)
+
+        prior_count = self._numeric_column(df, "prior_transaction_count")
+        velocity_1h = self._numeric_column(df, "prior_transaction_count_1h")
+        velocity_24h = self._numeric_column(df, "prior_transaction_count_24h")
+        amount_deviation = self._numeric_column(df, "amount_vs_prior_mean")
+        comps["behavior_velocity_1h"] = np.where(
+            velocity_1h >= VELOCITY_1H_THRESHOLD, VELOCITY_1H_POINTS, 0
+        ).astype(np.int64)
+        comps["behavior_velocity_24h"] = np.where(
+            velocity_24h >= VELOCITY_24H_THRESHOLD, VELOCITY_24H_POINTS, 0
+        ).astype(np.int64)
+        comps["behavior_amount_deviation"] = np.where(
+            (prior_count > 0)
+            & (amount_deviation >= AMOUNT_DEVIATION_THRESHOLD),
+            AMOUNT_DEVIATION_POINTS,
+            0,
+        ).astype(np.int64)
+        if "prior_transaction_count" in df.columns:
+            new_profile = df["prior_transaction_count"].notna().to_numpy() & (
+                prior_count == 0
+            )
+        else:
+            new_profile = np.zeros(len(df), dtype=bool)
+        comps["behavior_new_profile"] = np.where(
+            new_profile, NEW_PROFILE_POINTS, 0
+        ).astype(np.int64)
         return comps
+
+    @staticmethod
+    def _numeric_column(df: pd.DataFrame, column: str) -> np.ndarray:
+        if column not in df.columns:
+            return np.zeros(len(df), dtype=float)
+        values = pd.to_numeric(df[column], errors="coerce").to_numpy(dtype=float)
+        return np.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0)
 
     def score_dataframe(self, df: pd.DataFrame, include_reasons: bool = False) -> pd.DataFrame:
         """Vectorised scoring. Returns risk_score, risk_level, decision (+ reasons)."""
@@ -204,6 +248,16 @@ class RuleBasedFraudStrategy:
                 r.append(f"card4={c4[i]} (+{comps['card4'][i]})")
             if comps["card6"][i]:
                 r.append(f"card6={c6[i]} (+{comps['card6'][i]})")
+            if comps["behavior_velocity_1h"][i]:
+                r.append("high transaction velocity in the previous hour")
+            if comps["behavior_velocity_24h"][i]:
+                r.append("high transaction velocity in the previous 24 hours")
+            if comps["behavior_amount_deviation"][i]:
+                r.append(
+                    "transaction amount is significantly above the card's prior average"
+                )
+            if comps["behavior_new_profile"][i]:
+                r.append("no previous transaction history available for this card")
             res.append(r)
         return res
 
